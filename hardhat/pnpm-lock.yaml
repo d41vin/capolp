@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: ^5.2.0
+        version: 5.2.0
     devDependencies:
       '@nomiclabs/hardhat-ethers':
         specifier: ^2.0.2
@@ -320,6 +324,9 @@ packages:
       ethereum-waffle: '*'
       ethers: ^5.0.0
       hardhat: ^2.0.0
+
+  '@openzeppelin/contracts@5.2.0':
+    resolution: {integrity: sha512-bxjNie5z89W1Ea0NZLZluFh8PrFNn9DH8DQlujEok2yjsOlraUPKID5p1Wk3qdNbf6XkQ1Os2RvfiHrrXLHWKA==}
 
   '@resolver-engine/core@0.3.3':
     resolution: {integrity: sha512-eB8nEbKDJJBi5p5SrvrvILn4a0h42bKtbCTri3ZxCGt6UvoQyp7HnGOfki944bUjBSHKK3RvgfViHn+kqdXtnQ==}
@@ -4964,6 +4971,8 @@ snapshots:
       ethereum-waffle: 3.4.4(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.2)(utf-8-validate@5.0.10)
       ethers: 5.8.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       hardhat: 2.22.19(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
+
+  '@openzeppelin/contracts@5.2.0': {}
 
   '@resolver-engine/core@0.3.3':
     dependencies:

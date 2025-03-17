@@ -40,5 +40,8 @@
       "utf-8-validate",
       "web3"
     ]
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.2.0"
   }
 }
