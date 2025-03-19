@@ -28,6 +28,9 @@
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "standard": "^16.0.3"
   },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.2.0"
+  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "bufferutil",
@@ -40,8 +43,5 @@
       "utf-8-validate",
       "web3"
     ]
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^5.2.0"
   }
 }
