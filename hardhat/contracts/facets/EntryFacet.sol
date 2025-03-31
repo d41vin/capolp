@@ -76,7 +76,7 @@ contract EntryFacet {
 
         // Create new entry ID and update AppStorage
         uint256 newEntryId = s.nextEntryId;
-        s.nextEntryId++;
+        s.nextEntryId++; 
 
         // Create new entry and update AppStorage
         Entry storage newEntry = s.entries[newEntryId];
@@ -364,4 +364,117 @@ contract EntryFacet {
 
     //     return updateNotes;
     // }
+
+    // Function to vote on an entry with a comment in a single transaction
+    function voteOnEntryWithComment(
+        uint256 entryId,
+        bool isAttest,
+        string memory commentContent
+    ) external {
+        Entry storage entry = s.entries[entryId];
+
+        // Check if the entry is archived
+        require(
+            entry.state != EntryState.Archived,
+            "Cannot vote on archived entry"
+        );
+
+        // Check if user is the entry creator
+        require(entry.creator != msg.sender, "Cannot vote on own entry");
+
+        // Check if the user has already voted
+        require(
+            !s.users[msg.sender].hasVotedEntry[entryId],
+            "User has already voted on this entry"
+        );
+
+        // Check if the user's reputation is above the threshold
+        require(
+            s.users[msg.sender].reputationScore > -10,
+            "User cannot vote due to low reputation"
+        );
+
+        // Record the vote
+        uint256 voteId = s.nextVoteId;
+        s.nextVoteId++;
+        
+        // Create the comment first
+        uint256 commentId = s.nextCommentId;
+        s.nextCommentId++;
+
+        Comment storage comment = s.comments[commentId];
+        comment.id = commentId;
+        comment.isVoteComment = true;
+        comment.author = msg.sender;
+        comment.content = commentContent;
+        comment.timestamp = block.timestamp;
+        comment.parentId = 0; // Root comment
+        comment.entryId = entryId;
+        comment.voteId = voteId;
+        comment.replies = new uint256[](0);
+        comment.upvotes = new CommentVote[](0);
+        comment.downvotes = new CommentVote[](0);
+        comment.upvoteCount = 0;
+        comment.downvoteCount = 0;
+
+        // Add the comment to vote-comments
+        s.commentIndexInVote[commentId] = s.commentsByVotes[voteId].length;
+        s.commentsByVotes[voteId].push(commentId);
+
+        // Add the comment to the user's list of commented entries
+        s.userCommentIndex[msg.sender][commentId] = s
+            .users[msg.sender]
+            .commentedEntries
+            .length;
+        s.users[msg.sender].commentedEntries.push(entryId);
+
+        // Now create the vote with the comment ID
+        VoteDetail memory newVote = VoteDetail({
+            voteId: voteId,
+            voter: msg.sender,
+            voteType: isAttest ? VoteType.Attest : VoteType.Refute,
+            voteCommentId: commentId,
+            voteIndex: entry.votes.length,
+            votedAt: block.timestamp
+        });
+
+        // Map the user's address to their vote
+        entry.addressToVotes[msg.sender] = newVote;
+
+        // Add vote to the entry's votes array
+        entry.votes.push(newVote);
+
+        // Update total vote counts and user reputation score
+        if (isAttest) {
+            entry.totalAttestCount++;
+            s.users[msg.sender].reputationScore += 1;
+        } else {
+            entry.totalRefuteCount++;
+            s.users[msg.sender].reputationScore -= 1;
+        }
+
+        // Mark the user as having voted
+        s.users[msg.sender].hasVotedEntry[entryId] = true;
+
+        // Add the entry to the user's list of voted entries
+        s.users[msg.sender].votedEntries.push(entryId);
+
+        // Record the vote in the user's entryVotes mapping
+        s.users[msg.sender].entryVotes[entryId] = newVote;
+
+        emit EntryVoted(
+            entryId,
+            msg.sender,
+            isAttest ? "Attest" : "Refute",
+            commentId
+        );
+        
+        emit CommentCreated(
+            commentId,
+            msg.sender,
+            entryId,
+            commentContent,
+            true
+        );
+    }
 }
